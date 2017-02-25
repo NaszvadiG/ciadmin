@@ -20,12 +20,12 @@
 							<div id="dataTables-example_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 							  <div class="row">
 								 <div class="col-sm-6">
-									<a href="/category-add" class="btn btn-primary">Add Category</a>
+									<a href="<?php echo base_url('category-add');?>" class="btn btn-primary">Add Category</a>
 								 </div>
 								 <div class="col-sm-6">
-									<form action="<?php echo base_url();?>" method="GET" role="form">
+									<form action="<?php echo base_url('category-list');?>" method="GET" role="form">
 										<div id="dataTables-example_filter" class="dataTables_filter">
-											<label>Search by:<input name="searchname" type="search" class="form-control input-sm" placeholder="Category Name" aria-controls="dataTables-example" id="user-search" value="<?php echo '';?>"></label>
+											<label>Search by:<input name="categoryname" type="search" class="form-control input-sm" placeholder="Category Name" aria-controls="dataTables-example" id="user-search" value="<?php echo $search_key;?>"></label>
 											<button type="submit" class="btn btn-primary">Search</button>
 										</div>
 									</form>

@@ -26,8 +26,14 @@ class Category extends CI_Controller{
 		parse_str($_SERVER['QUERY_STRING'], $like);
 		unset($like['page']);
 		
+		$search_key = $this->input->get('categoryname');
+		if(isset($search_key) && $search_key){
+			$this->data['search_key'] = $search_key;
+		}else{
+			$this->data['search_key'] = '';
+		}
+		
 		$category_data = $this->categorydata->grab_category(array(), $like, array());
-		echo '<br>'.count($category_data).'<br>';
 		
 		//pagination settings
 		$config['base_url'] = site_url('category-list');
@@ -38,7 +44,7 @@ class Category extends CI_Controller{
 		$pagination = array_merge($config, $pagination);
 
 		$this->pagination->initialize($pagination);
-		$page = ($this->input->get('page')) ? $this->input->get('page') : 0;		
+		$this->data['page'] = ($this->input->get('page')) ? $this->input->get('page') : 0;		
 
 		$this->data['pagination'] = $this->pagination->create_links();
 		
@@ -46,5 +52,51 @@ class Category extends CI_Controller{
 		$this->data['category_details'] = $category_paginated_data;
 		
 		$this->load->view('category_list', $this->data); 
+	}
+	
+	public function category_add(){
+		if($this->session->userdata('has_error')){
+			$this->data['cat_details'] = (object)$this->session->userdata;
+		}
+		$this->load->view('category_add', $this->data); 
+	}
+	
+	public function add_category(){
+		$post_data = $this->input->post();
+			
+		$this->load->library('form_validation');
+		
+		$this->form_validation->set_rules('categoryname', 'Categoryname', 'trim|required|is_unique['.TABLE_CATEGORY.'.categoryname]');
+		
+		$this->session->unset_userdata($post_data);
+		if($this->form_validation->run() == FALSE)
+		{	
+			$this->session->set_userdata($post_data);
+			$this->session->set_userdata('has_error', true);
+			$this->session->set_userdata('catadd_notification', validation_errors());
+			
+			redirect($this->agent->referrer());
+		}else{
+			$code = $this->defaultdata->slugify($post_data['categoryname']);
+			$data = array(
+				"categoryname" => $post_data['categoryname'],
+				"code" => $code,
+				"is_active" => $post_data['is_active'],
+				"date_added" => time()
+			);
+			$this->categorydata->insert_category($data);
+			
+			$this->session->set_userdata('has_error', false);
+			
+			redirect(base_url('category-list'));
+		}
+	}
+	
+	public function category_delete($code){			
+		$cond['code'] = $code;
+		
+		if($this->categorydata->delete_category($cond)){
+			redirect($this->agent->referrer());		
+		}
 	}
 }
