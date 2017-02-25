@@ -2,17 +2,19 @@
 class Userdata extends CI_Model {
 	
 	public function grab_user_details($cond = array(), $limit = array(), $like = array()){
-		
-		if(!empty($limit)){
-			$this->db->limit($limit[0], $limit[1]);
-		}
-		
-		$this->db->order_by('date_added','desc');
-		$this->db->where($cond);
-		
+		if(!empty($cond)){
+			$this->db->where($cond);
+		}		
 		if(!empty($like)){
 			$this->db->like($like);
 		}
+		if(!empty($limit)){
+			$per_page = $limit[0];
+			$offset = $limit[1];
+			$start = max(0, ( $offset -1 ) * $per_page);
+			$this->db->limit($per_page, $start);
+		}
+		$this->db->order_by('date_added','desc');
 		$query = $this->db->get(TABLE_USER);
 		
 		return $query->result();

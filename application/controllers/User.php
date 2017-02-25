@@ -282,21 +282,36 @@
 			$this->load->view('user_edit', $this->data);
 		}
 		
+		public function hasSamePassword($pass){
+			$user_data = $this->userdata->grab_user_details(array("original_password" => $pass));
+			if(count($user_data) > 0){
+				$this->form_validation->set_message('hasSamePassword', 'Same password given');
+				return false;
+			}else{
+				return true;
+			}
+		}
+		
 		public function edit_user(){
 			$post_data = $this->input->post();
-			//echo "<pre>";print_r($post_data);die();
 			
 			$this->load->library('form_validation');
 			
 			if($post_data['username'] != $post_data['old_username']){
-				$this->form_validation->set_rules('username', 'Username', 'trim|required|is_unique['.TABLE_USER.'.username]');
-			}
-			if($post_data['reset_password']){
-				$this->form_validation->set_rules('reset_password', 'Repeat Password', 'trim|required|matches[password]');
-			}
-			if($post_data['email'] != $post_data['old_email']){	
-				$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique['.TABLE_USER.'.email]');	
+				$is_unique =  '|is_unique['.TABLE_USER.'.username]';
+			}else{
+				$is_unique =  '';
 			}			
+			$this->form_validation->set_rules('username', 'Username', 'trim|required'.$is_unique);
+			
+			$this->form_validation->set_rules('reset_password', 'Repeat Password', 'trim|callback_hasSamePassword');
+			
+			if($post_data['email'] != $post_data['old_email']){	
+				$is_unique =  '|is_unique['.TABLE_USER.'.email]';	
+			}else{
+				$is_unique =  '';
+			}
+			$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email'.$is_unique);			
 			
 			$this->session->unset_userdata($post_data);
 			if($this->form_validation->run() == FALSE)
