@@ -65,7 +65,7 @@ $route['privacy'] = 'user/privacy';
 
 $route['category-list'] = 'category/category_list';
 $route['category-add'] = 'category/category_add';
-$route['category-edit/(:num)'] = 'category/category_add/$1';
+$route['category-edit/(:any)'] = 'category/category_edit/$1';
 
 $route['product-list'] = 'product/product_list';
 $route['product-add'] = 'product/product_add';

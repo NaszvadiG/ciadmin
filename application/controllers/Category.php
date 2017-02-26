@@ -92,6 +92,52 @@ class Category extends CI_Controller{
 		}
 	}
 	
+	public function category_edit($code){
+		if($this->session->userdata('has_error')){
+			$this->data['cat_details'] = (object)$this->session->userdata;
+		}else{
+			$cond['code'] = $code;
+			$cat_details = $this->categorydata->grab_category($cond);
+			$this->data['cat_details'] = $cat_details[0];
+		}
+		
+		$this->load->view('category_edit', $this->data); 
+	}
+	
+	public function edit_category(){
+		$post_data = $this->input->post();
+			
+		$this->load->library('form_validation');
+		
+		if($post_data['categoryname'] != $post_data['old_categoryname']){
+			$is_unique =  '|is_unique['.TABLE_CATEGORY.'.categoryname]';
+		}else{
+			$is_unique =  '';
+		}
+		$this->form_validation->set_rules('categoryname', 'Categoryname', 'trim|required'.$is_unique);		
+		
+		$this->session->unset_userdata($post_data);
+		if($this->form_validation->run() == FALSE)
+		{	
+			$this->session->set_userdata($post_data);
+			
+			$this->session->set_userdata('has_error', true);
+			$this->session->set_userdata('catedit_notification', validation_errors());
+			
+			redirect($this->agent->referrer());
+		}else{
+			$cond['code'] = $post_data['code'];
+			$data = array(
+				"categoryname" => $post_data['categoryname'],
+				"is_active" => $post_data['is_active'],
+				"date_added" => time()
+			);
+			$this->categorydata->update_category($cond, $data);
+			
+			redirect(base_url('category-list'));
+		}
+	}
+	
 	public function category_delete($code){			
 		$cond['code'] = $code;
 		
